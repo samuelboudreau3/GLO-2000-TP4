@@ -1,0 +1,33 @@
+username = "Samuel Boudreau"
+password = "TEst123456"
+
+account_valide = True
+username_check = username.replace("-", "")
+username_check = username_check.replace("_", "")
+username_check = username_check.replace(".", "")
+username_check = username_check.replace(" ", "")
+
+
+if not (username_check.isalpha()):
+    account_valide = False
+
+pw_longueur = False
+if len(password) >= 10:
+    pw_longueur = True
+
+pw_nombre = False
+pw_lower = False
+pw_upper = False
+for character in password:
+    if character.isnumeric():
+        pw_nombre = True
+    elif character.islower():
+        pw_lower = True
+    elif character.isupper():
+        pw_upper = True
+
+if not (pw_longueur and pw_lower and pw_nombre and pw_upper):
+    account_valide = False
+
+print(account_valide)
+
