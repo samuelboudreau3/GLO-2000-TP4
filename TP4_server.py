@@ -69,6 +69,51 @@ class Server:
         associe le socket au nouvel l'utilisateur et retourne un succès,
         sinon retourne un message d'erreur.
         """
+        # SAM : validation est fonctionnelle, reste à voir pour communication et tout
+        username = payload['username']
+        password = payload['password']
+
+        account_valide = True
+        username_check = username.replace("-", "")
+        username_check = username_check.replace("_", "")
+        username_check = username_check.replace(".", "")
+        username_check = username_check.replace(" ", "")
+        
+
+        if not (username_check.isalnum()):
+            account_valide = False
+        
+        pw_longueur = False
+        if len(password) >= 10:
+            pw_longueur = True
+
+        pw_nombre = False
+        pw_lower = False
+        pw_upper = False
+        for character in password:
+            if character.isnumeric():
+                pw_nombre = True
+            elif character.islower():
+                pw_lower = True
+            elif character.isupper():
+                pw_upper = True
+
+        if not (pw_longueur and pw_lower and pw_nombre and pw_upper):
+            account_valide = False
+
+        if account_valide:
+            """
+            - crée dossier dans SERVER_DATA_DIR
+            - Hache mdp sha3_512 et l'écrit dans PASSWORD_FILENAME
+            - prévient client entête OK
+            - associe socket avec username
+            """
+        else:
+            entete_payload = gloutils.ErrorPayload(error_message="La création a échouée:\n - Le nom d'utilisateur est invalide.\n\
+                                                                  - Le mot de passe n'est pas assez sûr.\n")
+            message_envoye = gloutils.GloMessage(header=gloutils.Headers.ERROR, payload = entete_payload)
+            glosocket.send_msg(self._server_socket, message_envoye)
+            
         return gloutils.GloMessage()
 
     def _login(self, client_soc: socket.socket, payload: gloutils.AuthPayload

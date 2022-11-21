@@ -46,6 +46,8 @@ class Client:
         response = glosocket.recv_msg(self._client_socket)
         if json.loads(response)['header'] == gloutils.Headers.OK:
             self._username = username
+        if json.loads(response)['header'] == gloutils.Headers.ERROR:
+            pass
 
     def _login(self) -> None:
         """
@@ -86,6 +88,15 @@ class Client:
         S'il n'y a pas de courriel à lire, l'utilisateur est averti avant de
         retourner au menu principal.
         """
+        entete = gloutils.GloMessage(header=gloutils.Headers.INBOX_READING_REQUEST)
+        glosocket.send_msg(self._client_socket, json.dumps(entete))
+        inbox = glosocket.recv_msg(self._client_socket)
+        print(inbox) #??? est-ce que c'est tout simplement une liste qu'on reçoit
+
+
+
+
+
 
     def _send_email(self) -> None:
         """
@@ -98,6 +109,24 @@ class Client:
 
         Transmet ces informations avec l'entête `EMAIL_SENDING`.
         """
+        dest = input("Entrez l'adresse email du destinataire")
+        sujet = input("Entrez le sujet du message")
+        print("Entrez le contenu du courriel, terminez la saisie avec un '.' seul sur une ligne:")
+        corps = ""
+        bool_corps = True
+        while bool_corps == True:
+            input_corps = input()
+            if input_corps == '.':
+                bool_corps = False
+            else:
+                corps += input_corps + '\n'
+        entete_payload = gloutils.EmailContentPayload(sender=self._username, 
+                                                      destination=dest, 
+                                                      subject=sujet, 
+                                                      date=gloutils.get_current_utc_time(),
+                                                      content=corps)
+        entete = gloutils.GloMessage(header=gloutils.Headers.EMAIL_SENDING, payload=entete_payload)
+        glosocket.send_msg(self._client_socket, json.dumps(entete))
 
     def _check_stats(self) -> None:
         """
